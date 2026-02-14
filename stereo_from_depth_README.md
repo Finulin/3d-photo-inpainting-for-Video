@@ -142,3 +142,14 @@ Wenn du möchtest, erweitere ich das Skript um:
 - bessere Hole-Filling-Methoden (PatchMatch / exemplar-based)
 
 Viel Erfolg! Falls du möchtest, erstelle ich noch eine kleine Testdatei `run_stereo_test.sh` im Repo, die die oben genannten Schritte automatisiert.
+
+Beispiel-Skript
+---------------
+
+Im Repo gibt es jetzt `run_video_example.sh`, ein kleines Shell-Skript, das zeigt, wie du aus `depth/moon.npy` eine Depth-Frame-Sequenz erzeugst und `stereo_from_depth_video.py` im Pipe-Modus ausführst. Stelle sicher, dass das Skript ausführbar ist:
+
+```bash
+chmod +x run_video_example.sh
+./run_video_example.sh
+```
+
