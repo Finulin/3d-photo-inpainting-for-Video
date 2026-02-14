@@ -23,6 +23,7 @@ import subprocess
 from pathlib import Path
 import cv2
 import numpy as np
+from tqdm import tqdm
 
 try:
     from stereo_from_depth import generate_stereo_pair
@@ -127,6 +128,9 @@ def main():
         print('Starting ffmpeg processes (pipe mode)...')
         left_proc = subprocess.Popen(left_cmd, stdin=subprocess.PIPE)
         right_proc = subprocess.Popen(right_cmd, stdin=subprocess.PIPE)
+    # Use tqdm progress bar (if total_frames available, show accurate progress)
+    total = total_frames if (total_frames and total_frames > 0) else None
+    pbar = tqdm(total=total, desc='Frames', unit='fr')
     try:
         while True:
             ret, frame = cap.read()
@@ -137,7 +141,7 @@ def main():
             if depth_is_video:
                 dret, dframe = depth_cap.read()
                 if not dret:
-                    print(f'Warning: depth video ended at frame {frame_idx}')
+                    tqdm.write(f'Warning: depth video ended at frame {frame_idx}')
                     depth = np.zeros((img_rgb.shape[0], img_rgb.shape[1]), dtype=np.float32)
                 else:
                     if dframe.ndim == 3:
@@ -153,14 +157,14 @@ def main():
                     else:
                         dimg = cv2.imread(str(df), cv2.IMREAD_UNCHANGED)
                         if dimg is None:
-                            print(f'Warning: cannot read depth file {df}; using zeros')
+                            tqdm.write(f'Warning: cannot read depth file {df}; using zeros')
                             depth = np.zeros((img_rgb.shape[0], img_rgb.shape[1]), dtype=np.float32)
                         else:
                             if dimg.ndim == 3:
                                 dimg = cv2.cvtColor(dimg, cv2.COLOR_BGR2GRAY)
                             depth = dimg.astype(np.float32)
                 else:
-                    print(f'Warning: missing depth file for frame {frame_idx}; using zeros')
+                    tqdm.write(f'Warning: missing depth file for frame {frame_idx}; using zeros')
                     depth = np.zeros((img_rgb.shape[0], img_rgb.shape[1]), dtype=np.float32)
 
             if depth.shape[0] != img_rgb.shape[0] or depth.shape[1] != img_rgb.shape[1]:
@@ -188,13 +192,13 @@ def main():
 
             frame_idx += 1
             saved += 1
-            if frame_idx % 50 == 0:
-                print(f'Processed frames: {frame_idx}')
+            pbar.update(1)
 
     finally:
         cap.release()
         if depth_cap is not None:
             depth_cap.release()
+        pbar.close()
 
     if saved == 0:
         print('No frames processed; aborting ffmpeg step.')

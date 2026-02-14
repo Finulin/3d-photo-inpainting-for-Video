@@ -6,6 +6,9 @@ transforms3d==0.3.1
 networkx==2.3
 scikit-image
 
+# Progress bar utility used by stereo_from_depth_video.py
+tqdm>=4.65
+
 # Note: 'cynetworkx' provides a C-accelerated version of networkx but requires
 # a build step (Cython) and may fail to install via pip on some systems.
 # If you do NOT need it, you can skip installing 'cynetworkx' and use 'networkx'
